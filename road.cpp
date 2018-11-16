@@ -1,15 +1,19 @@
-#include "Test.h"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <tuple>
 #include <fstream>
 #include <valarray>
 #include <cstdio>
+using namespace std;
 
 pair<int, vector<int>> get_data();
-void count(pair<int, vector<int>> &&data);
+void count_(pair<int, vector<int>> &&data);
 void show(valarray<int> &vi);
 
 int main()
 {
-    count(get_data());
+    count_(get_data());
 
     return 0;
 }
@@ -17,7 +21,7 @@ int main()
 pair<int, vector<int>> get_data()
 {
     ifstream fin;
-    fin.open("../road.in");
+    fin.open("road.in");
     if (!fin.is_open())
     {
         cout << "Can't open file.\n";
@@ -32,31 +36,26 @@ pair<int, vector<int>> get_data()
         lines.push_back(tmp);
     }
 
-    int Size;
-    sscanf(lines[0].c_str(), "%d", &Size);
+    int Size = stoi(lines[0]);
     vector<int> num;
-    int n;
     tmp.clear();
-    for (int i = 0; i < lines[1].size(); ++i)
+    for (unsigned i = 0; i < lines[1].size(); ++i)
     {
         if (lines[1][i] != ' ')
             tmp += lines[1][i];
         else if (lines[1][i] == ' ' && !tmp.empty())
         {
-            sscanf(tmp.c_str(), "%d", &n);
-            num.push_back(n);
+            num.push_back(stoi(tmp));
             tmp.clear();
         }
     }
     if (!tmp.empty())
-    {
-        sscanf(tmp.c_str(), "%d", &n);
-        num.push_back(n);
-    }
+        num.push_back(stoi(tmp));
+        
     return make_pair(Size, num);
 };
 
-void count(pair<int, vector<int>> &&data)
+void count_(pair<int, vector<int>> &&data)
 {
     int Size = data.first;
     auto num = data.second;
@@ -66,12 +65,14 @@ void count(pair<int, vector<int>> &&data)
         roads[i] = num[i];
 
     int days = 0;
-    vector<int> index;
     while (roads.min() != 0)
     {
         roads -= 1;
+        show(roads);
         days++;
     }
+
+    bool flag = false;
     while (true)
     {
         if (!roads.sum())
@@ -79,13 +80,14 @@ void count(pair<int, vector<int>> &&data)
         for (int i = 0; i < Size; ++i)
         {
             if (roads[i] != 0)
-                index.push_back(i);
-            else if (roads[i] == 0 && !index.empty())
+            {
+                roads[i] -= 1;
+                flag = true;
+            }
+            else if (roads[i] == 0 && flag)
                 break;
         }
-        for (auto x: index)
-            roads[x] -= 1;
-        index.clear();
+        flag = false;
         days++;
         show(roads);
     }
